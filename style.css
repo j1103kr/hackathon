@@ -1,0 +1,204 @@
+/* 기본 초기화 */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; }
+body { overflow: hidden; }
+
+/* 지도 배경 */
+#map {
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* 공통 플로팅(Floating) 스타일 */
+.floating-ui {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+/* 검색바 */
+.search-bar {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    width: 300px;
+}
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    margin-left: 10px;
+    font-size: 16px;
+}
+
+/* 환율 위젯 */
+.exchange-widget {
+    top: 20px;
+    right: 20px;
+    padding: 15px;
+    min-width: 200px;
+}
+.exchange-title { font-size: 12px; color: #666; margin-bottom: 5px; }
+.exchange-rate { font-size: 20px; font-weight: bold; color: #333; }
+.exchange-diff { font-size: 12px; color: #2ecc71; margin-top: 5px; font-weight: bold; }
+.exchange-desc { font-size: 11px; color: #888; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px; }
+
+/* 하단 카드 리스트 */
+.bottom-cards {
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+    padding: 0 20px;
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 10px;
+}
+.bottom-cards::-webkit-scrollbar { display: none; }
+
+.card {
+    min-width: 260px;
+    height: 140px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    z-index: 1000;
+}
+.card:hover { transform: translateY(-5px); border: 2px solid #333; }
+
+.card-img { width: 100px; height: 100%; background-color: #ddd; object-fit: cover; }
+.card-info { padding: 15px; display: flex; flex-direction: column; justify-content: center; }
+.card-tag { font-size: 10px; font-weight: bold; color: #555; background: #eee; padding: 2px 6px; border-radius: 4px; width: fit-content; margin-bottom: 5px; }
+.card-tag.jp { color: #BC002D; background: #ffe6ea; }
+.card-tag.kr { color: #003478; background: #e6efff; }
+.card-name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+.card-desc { font-size: 12px; color: #777; }
+
+/* 날씨 위젯 스타일 */
+.weather-widget {
+    top: 160px; /* 환율 위젯(top:20px) 아래에 배치 */
+    right: 20px;
+    padding: 15px;
+    min-width: 140px;
+    text-align: center;
+}
+
+.weather-header {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.weather-temp {
+    font-size: 28px;
+    font-weight: 800;
+    color: #333;
+}
+
+.weather-desc {
+    font-size: 11px;
+    color: #888;
+    margin-top: 5px;
+}
+/* 필터 바 스타일 */
+.filter-bar {
+    top: 80px; /* 검색바(20px) + 높이 고려해서 아래로 내림 */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    display: flex;
+    gap: 10px; /* 버튼 사이 간격 */
+}
+
+.filter-btn {
+    border: none;
+    background: #f0f0f0;
+    padding: 8px 16px;
+    border-radius: 20px; /* 알약 모양 */
+    cursor: pointer;
+    font-weight: bold;
+    color: #555;
+    transition: all 0.2s; /* 부드러운 효과 */
+}
+
+.filter-btn:hover {
+    background-color: #ddd;
+}
+
+/* 활성화된 버튼 스타일 (검정색) */
+.filter-btn.active {
+    background-color: #333;
+    color: white;
+}
+
+/* 팝업 내부 스타일 */
+.popup-content {
+    text-align: center;
+    min-width: 150px;
+}
+.popup-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+.like-box {
+    margin-top: 10px;
+    background: #ffe6ea;
+    padding: 5px 10px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+.like-box:active { transform: scale(0.95); }
+.like-box i { color: #ff4757; } /* 하트 색상 */
+.like-count { font-weight: bold; color: #ff4757; }
+
+/* 팝업 안의 날씨 버튼 꾸미기 */
+.weather-btn {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); /* 시원한 하늘색 그라데이션 */
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 20px; /* 둥근 알약 모양 */
+    cursor: pointer;
+    margin-bottom: 10px; /* 하트 버튼과의 간격 */
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1); /* 살짝 그림자 */
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* 아이콘과 글자 사이 간격 */
+}
+
+/* 마우스 올렸을 때 효과 */
+.weather-btn:hover {
+    transform: translateY(-2px); /* 살짝 위로 뜸 */
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* 클릭했을 때 효과 */
+.weather-btn:active {
+    transform: scale(0.95);
+}
