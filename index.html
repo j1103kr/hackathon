@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korea-Japan Connect</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="lang-toggle" onclick="toggleLanguage()">
+        <span id="lang-icon">🇰🇷</span>
+    </div>
+
+    <div class="floating-ui search-bar">
+        <i class="fas fa-search" style="color: #888;"></i>
+        <input type="text" id="search-input" placeholder="어디로 떠나볼까요?">
+    </div>
+
+    <div class="floating-ui filter-bar">
+        <button class="filter-btn active" id="btn-all" data-category="all" onclick="filterCategory('all')">전체</button>
+        <button class="filter-btn" id="btn-food" data-category="food" onclick="filterCategory('food')">🍜 맛집</button>
+        <button class="filter-btn" id="btn-view" data-category="view" onclick="filterCategory('view')">🏰 관광</button>
+        <button class="filter-btn" id="btn-culture" data-category="culture" onclick="filterCategory('culture')">💛 문화</button>
+    </div>
+
+    <div class="floating-ui exchange-widget">
+        <div class="exchange-title" id="exchange-title">🇯🇵 JPY 100 ➔ 🇰🇷 KRW</div>
+        <div class="exchange-rate" id="rate-text">로딩중...</div>
+        <div class="exchange-diff">환율 계산 중...</div>
+        <div class="exchange-desc" id="exchange-desc">잠시만 기다려주세요</div>
+    </div>
+
+    <div class="floating-ui weather-widget">
+        <div class="weather-header">
+            <span id="city-name">지역 선택 필요</span>
+            <i class="fas fa-cloud-sun" style="color: orange;"></i>
+        </div>
+        <div class="weather-temp" id="current-temp">--°C</div>
+        <div class="weather-desc">지도에서 핀을 눌러 날씨를 확인하세요!</div>
+    </div>
+
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script type="module" src="script.js"></script>
+
+</body>
+<div class="bottom-cards">
+    </div>
+</html>

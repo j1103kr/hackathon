@@ -1,8 +1,8 @@
 // -----------------------------------------------------------
-// 1. Firebase 라이브러리 가져오기 (CDN 방식)
+// 1. Firebase 라이브러리 가져오기
 // -----------------------------------------------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, increment, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, increment, onSnapshot, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { initialData } from './data.js'; 
 
 // -----------------------------------------------------------
@@ -18,9 +18,55 @@ const firebaseConfig = {
   measurementId: "G-2MEV1JR83X"
 };
 
-// Firebase 실행
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+
+// -----------------------------------------------------------
+// ⭐ 다국어 설정
+// -----------------------------------------------------------
+let currentLang = 'ko'; // 기본 언어
+
+const translations = {
+    ko: {
+        placeholder: "어디로 떠나볼까요?",
+        all: "전체", food: "🍜 맛집", view: "🏰 관광", culture: "💛 문화",
+        exchangeTitle: "🇯🇵 JPY 100 ➔ 🇰🇷 KRW",
+        starbucks: "스벅 라떼가 한국보다",
+        cheap: "원 싸요!", expensive: "원 비싸요.",
+        weatherDesc: "지도에서 핀을 눌러 날씨를 확인하세요!",
+        cityNeed: "지역 선택 필요",
+        w_hot: "너무 더워요! 실내 추천 🥵",
+        w_warm: "반팔 입기 좋은 날씨! 👕",
+        w_good: "여행하기 최고의 날씨! ✨",
+        w_cool: "쌀쌀해요! 겉옷 챙기세요 🧥",
+        w_cold: "너무 추워요! 패딩 필수 🧣",
+        popup_weather: "날씨 확인",
+        popup_like: "좋아요",
+        
+        review_write: "리뷰 쓰기",
+        review_read: "리뷰 보기"
+    },
+    ja: {
+        placeholder: "どこへ行きますか？",
+        all: "すべて", food: "🍜 グルメ", view: "🏰 観光", culture: "💛 文化",
+        exchangeTitle: "🇰🇷 KRW 1000 ➔ 🇯🇵 JPY",
+        starbucks: "スタバのラテが日本より",
+        cheap: "円 安い！", expensive: "円 高い。",
+        weatherDesc: "ピンをクリックして天気を確認！",
+        cityNeed: "地域を選択",
+        w_hot: "暑すぎます！室内がおすすめ 🥵",
+        w_warm: "半袖でいい天気！ 👕",
+        w_good: "旅行に最高の天気！ ✨",
+        w_cool: "肌寒いです！上着が必要 🧥",
+        w_cold: "寒いです！ダウン必須 🧣",
+        popup_weather: "天気予報",
+        popup_like: "いいね",
+
+        review_write: "レビューを書く",
+        review_read: "レビューを見る"
+    }
+};
 
 
 // -----------------------------------------------------------
@@ -31,16 +77,12 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
+
 var markerCluster = L.markerClusterGroup({
-    maxClusterRadius: 30, 
-    disableClusteringAtZoom: 11
+    maxClusterRadius: 30,      
+    disableClusteringAtZoom: 11 
 });
 map.addLayer(markerCluster);
-
-// 카드 클릭 시 해당 위치로 이동하는 함수 (index.html에서 사용됨)
-window.moveToLocation = function(lat, lng) {
-    map.flyTo([lat, lng], 14, { duration: 1.5 });
-}
 
 
 // -----------------------------------------------------------
@@ -50,81 +92,74 @@ async function fetchExchangeRate() {
     const diffEl = document.querySelector('.exchange-diff');
     const descEl = document.querySelector('.exchange-desc');
     const rateEl = document.getElementById('rate-text');
+    
+    const t = translations[currentLang]; 
 
     try {
         const response = await fetch('https://api.exchangerate-api.com/v4/latest/JPY');
         const data = await response.json();
         const rate = data.rates.KRW; 
-        const result = (rate * 100).toFixed(0); 
-        
-        // 화면에 환율 표시
-        rateEl.innerText = `₩ ${result}`;
 
-        // 스벅 라떼 계산
-        const japanLattePrice = 490 * rate; 
-        const diff = (5000 - japanLattePrice).toFixed(0); 
-
-        // 멘트 업데이트
-        if (result < 950) {
+        if (currentLang === 'ko') {
+            const result = (rate * 100).toFixed(0);
+            rateEl.innerText = `₩ ${result}`;
+            
+            const jpLatteInKrw = 490 * rate; 
+            const diff = (5000 - jpLatteInKrw).toFixed(0);
+            
+            descEl.innerText = `"${t.starbucks} ${diff}${t.cheap}"`;
             diffEl.innerText = "▼ 슈퍼 엔저 찬스!";
-            diffEl.style.color = "#2ecc71"; 
-            descEl.innerText = `"스벅 라떼가 한국보다 ${diff}원 싸요!"`;
-        } else if (result < 1000) {
-            diffEl.innerText = "- 적절한 환율";
-            diffEl.style.color = "#333"; 
-            descEl.innerText = `"스벅 라떼가 한국보다 ${diff}원 저렴해요."`;
+            diffEl.style.color = "#2ecc71";
+
         } else {
-            diffEl.innerText = "▲ 환율이 조금 올랐어요";
+            const result = (1000 / rate).toFixed(0);
+            rateEl.innerText = `¥ ${result}`;
+
+            const krLatteInJpy = 5000 / rate;
+            const diff = (krLatteInJpy - 490).toFixed(0);
+
+            descEl.innerText = `"${t.starbucks} ${diff}${t.expensive}"`; 
+            diffEl.innerText = "▲ 韓国の方が高い"; 
             diffEl.style.color = "#e74c3c"; 
-            descEl.innerText = "물가 차이가 많이 줄었어요.";
         }
 
     } catch (error) {
-        // 🚨 에러 발생 시에도 자연스럽게 보이도록 처리
-        console.error("환율 로딩 실패:", error);
-        rateEl.innerText = "₩ 910 (예상)"; // 예상치
-        
-        // 예상치(910원) 기준 멘트 강제 적용
-        diffEl.innerText = "▼ 환율 정보 로딩 실패";
-        diffEl.style.color = "#888"; 
-        descEl.innerText = "기본값(910원)으로 표시됩니다.";
+        console.error(error);
+        rateEl.innerText = "Error";
     }
 }
-fetchExchangeRate();
+fetchExchangeRate(); 
 
-// 날씨 함수
 window.fetchWeather = async function(lat, lng, cityName) {
     try {
-        // 로딩 표시
+        const t = translations[currentLang]; 
+
         document.getElementById('city-name').innerText = cityName;
         document.getElementById('current-temp').innerText = "..";
         
-        // API 호출
         const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
         const data = await response.json();
         const temp = data.current_weather.temperature;
         
-        // 온도 업데이트
         document.getElementById('current-temp').innerText = `${temp}°C`;
         
-        // 멘트 자동 변경 로직
         const descEl = document.querySelector('.weather-desc');
         const iconEl = document.querySelector('.weather-header i');
 
         if (temp >= 30) {
-            descEl.innerText = "너무 더워요! 실내 위주로 다니세요 🥵";
-            iconEl.className = "fas fa-sun"; 
+            descEl.innerText = t.w_hot;
+            iconEl.className = "fas fa-sun";
         } else if (temp >= 23) {
-            descEl.innerText = "반팔 입기 좋은 초여름 날씨! 👕";
+            descEl.innerText = t.w_warm;
             iconEl.className = "fas fa-cloud-sun";
         } else if (temp >= 15) {
-            descEl.innerText = "여행하기 최고의 날씨입니다! ✨";
+            descEl.innerText = t.w_good;
             iconEl.className = "fas fa-smile";
         } else if (temp >= 5) {
-            descEl.innerText = "쌀쌀해요! 코트나 자켓 챙기세요 🧥"; 
+            descEl.innerText = t.w_cool;
             iconEl.className = "fas fa-wind";
         } else {
-            descEl.innerText = "너무 추워요! 패딩 필수입니다 🧣";
+            descEl.innerText = t.w_cold;
             iconEl.className = "fas fa-snowflake";
         }
 
@@ -133,217 +168,279 @@ window.fetchWeather = async function(lat, lng, cityName) {
 
 
 // -----------------------------------------------------------
-// 5. ⭐ Firebase 데이터 연동 & 좋아요 기능
+// 5. Firebase 데이터 연동 & 로직 통합
 // -----------------------------------------------------------
 var locations = [];
-var currentMarkers = [];
 
-// (1) 데이터 실시간 감시 (onSnapshot)
-const placesCol = collection(db, "places"); 
+const placesCol = collection(db, "places");
 
 onSnapshot(placesCol, (snapshot) => {
     locations = []; 
     snapshot.forEach((doc) => {
-        const data = doc.data();
-        locations.push({
-            id: doc.id, 
-            ...data
-        });
+        locations.push({ id: doc.id, ...doc.data() });
     });
     
-    // 데이터가 바뀌면 지도 핀도 새로고침
+    // 데이터 로드 후 현재 필터 상태에 맞춰 갱신
     const activeBtn = document.querySelector('.filter-btn.active');
-    const currentCategory = activeBtn ? getCategoryFromBtn(activeBtn) : 'all';
+    const currentCategory = activeBtn ? activeBtn.dataset.category : 'all';
     filterCategory(currentCategory);
 });
 
-// (2) 좋아요 클릭 함수
 window.toggleLike = async function(docId) {
     const docRef = doc(db, "places", docId);
+    
+    // 1. 내 브라우저에 저장된 '좋아요 목록' 가져오기
+    let myLikes = JSON.parse(localStorage.getItem('myLikedPlaces')) || [];
+
     try {
-        await updateDoc(docRef, {
-            likes: increment(1)
-        });
-        console.log("좋아요 성공!");
+        if (myLikes.includes(docId)) {
+            // 💔 이미 눌렀다면? -> 취소하기 (숫자 -1)
+            await updateDoc(docRef, { likes: increment(-1) });
+            
+            // 목록에서 제거
+            myLikes = myLikes.filter(id => id !== docId);
+            localStorage.setItem('myLikedPlaces', JSON.stringify(myLikes));
+            
+            console.log("좋아요 취소");
+        } else {
+            // ❤️ 안 눌렀다면? -> 좋아요 (숫자 +1)
+            await updateDoc(docRef, { likes: increment(1) });
+            
+            // 목록에 추가
+            myLikes.push(docId);
+            localStorage.setItem('myLikedPlaces', JSON.stringify(myLikes));
+            
+            console.log("좋아요 성공");
+        }
     } catch (e) {
         console.error("좋아요 실패:", e);
-        alert("좋아요를 누르지 못했습니다.");
+        alert("오류가 발생했습니다.");
     }
 }
 
-// (3) 필터 및 마커 찍기
-window.filterCategory = function(category) {
-    markerCluster.clearLayers();
+// -----------------------------------------------------------
+// [공통 함수] 지도에 핀(마커) 찍기 - 모든 기능 통합 (리뷰 버튼 포함!)
+// -----------------------------------------------------------
+function updateMapMarkers(targetLocations) {
+    markerCluster.clearLayers(); 
+    const t = translations[currentLang]; 
+    
+    // ⭐ 내 브라우저에 저장된 '좋아요 목록' 미리 가져오기
+    const myLikes = JSON.parse(localStorage.getItem('myLikedPlaces')) || [];
 
-    const filtered = category === 'all' 
-        ? locations 
-        : locations.filter(loc => loc.category === category);
-
-    filtered.forEach(loc => {
+    targetLocations.forEach(loc => {
         var marker = L.marker([loc.lat, loc.lng]);
         
-        // 팝업 내용 (기존 디자인 유지)
+        let displayName = loc.name;
+        if (currentLang === 'ja' && loc.name_ja) {
+            displayName = loc.name_ja;
+        }
+
+        // ⭐ 내가 좋아요 누른 곳이면 빨간색(#ff4757), 아니면 회색(#ccc)
+        const isLiked = myLikes.includes(loc.id);
+        const heartColor = isLiked ? "#ff4757" : "#ccc"; 
+
         const popupContent = `
             <div class="popup-content">
-                <span class="popup-title">${loc.name}</span>
-                <button class="weather-btn" onclick="fetchWeather(${loc.lat}, ${loc.lng}, '${loc.name}')">
-                    <i class="fas fa-cloud-sun"></i> 날씨 확인
+                <span class="popup-title">${displayName}</span>
+                
+                <button class="weather-btn" onclick="fetchWeather(${loc.lat}, ${loc.lng}, '${displayName}')">
+                    <i class="fas fa-cloud-sun"></i> ${t.popup_weather}
                 </button>
-                <br>
-                <div class="like-box" onclick="toggleLike('${loc.id}')">
-                    <i class="fas fa-heart"></i>
-                    <span class="like-count">${loc.likes || 0}</span>
+                
+                <div style="display:flex; gap:5px; justify-content:center; margin-top:5px;">
+                    <button class="weather-btn" style="background: linear-gradient(135deg, #FF9966 0%, #FF5E62 100%); flex:1; padding:6px 5px; font-size:11px;" 
+                            onclick="openReviewModal('${loc.id}', '${displayName}')">
+                        <i class="fas fa-pen"></i> ${t.review_write}
+                    </button>
+                    <button class="weather-btn" style="background: linear-gradient(135deg, #56CCF2 0%, #2F80ED 100%); flex:1; padding:6px 5px; font-size:11px;" 
+                            onclick="openReadReviewModal('${loc.id}')">
+                        <i class="fas fa-book"></i> ${t.review_read}
+                    </button>
+                </div>
+                
+                <div class="like-box" style="margin-top: 8px;" onclick="toggleLike('${loc.id}')">
+                    <i class="fas fa-heart" style="color: ${heartColor}; transition: color 0.3s;"></i>
+                    <span class="like-count" style="color: ${heartColor};">${loc.likes || 0}</span>
+                    <span style="font-size:12px; margin-left:3px; color:#555;">${t.popup_like}</span>
                 </div>
             </div>
         `;
         
         marker.bindPopup(popupContent);
-        
-        // 클릭 이벤트
-        marker.on('click', () => {
-            map.flyTo([loc.lat, loc.lng], 14, { duration: 1.5 });
-        });
-
+        marker.on('click', () => { map.flyTo([loc.lat, loc.lng], 14, { duration: 1.5 }); });
         markerCluster.addLayer(marker);
     });
-    
-    // 버튼 스타일 업데이트
+}
+
+// [카테고리 필터]
+window.filterCategory = function(category) {
+    const filtered = category === 'all' 
+        ? locations 
+        : locations.filter(loc => loc.category === category);
+
+    updateMapMarkers(filtered); // 공통 함수 호출
     updateBtnStyle(category);
 }
 
-// 버튼 스타일 헬퍼 함수
+// [검색 기능]
+document.getElementById('search-input').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase(); 
+
+    const searched = locations.filter(loc => {
+        const koName = loc.name.toLowerCase();
+        const jaName = loc.name_ja ? loc.name_ja.toLowerCase() : "";
+        return koName.includes(searchTerm) || jaName.includes(searchTerm);
+    });
+
+    updateMapMarkers(searched); // 공통 함수 호출
+});
+
 function updateBtnStyle(category) {
     const buttons = document.querySelectorAll('.filter-btn');
-    
     buttons.forEach(btn => {
         btn.classList.remove('active');
-        
         if (btn.dataset.category === category) {
             btn.classList.add('active');
         }
     });
 }
 
-// 버튼 텍스트로 카테고리 유추 (간단 버전)
-function getCategoryFromBtn(btn) {
-    if (btn.innerText.includes('맛집')) return 'food';
-    if (btn.innerText.includes('관광')) return 'view';
-    if (btn.innerText.includes('교류')) return 'culture';
-    return 'all';
-}
+// -----------------------------------------------------------
+// 6. 언어 전환 함수
+// -----------------------------------------------------------
+window.toggleLanguage = function() {
+    currentLang = currentLang === 'ko' ? 'ja' : 'ko';
+    
+    document.getElementById('lang-icon').innerText = currentLang === 'ko' ? "🇰🇷" : "🇯🇵";
 
+    const t = translations[currentLang];
+    
+    document.getElementById('search-input').placeholder = t.placeholder;
+    document.getElementById('btn-all').innerText = t.all;
+    document.getElementById('btn-food').innerText = t.food;
+    document.getElementById('btn-view').innerText = t.view;
+    document.getElementById('btn-culture').innerText = t.culture;
+    document.getElementById('exchange-title').innerText = t.exchangeTitle;
+    document.getElementById('city-name').innerText = t.cityNeed; 
+    document.querySelector('.weather-desc').innerText = t.weatherDesc;
+    
+    fetchExchangeRate(); 
+
+    // 지도 핀 새로고침
+    const activeBtn = document.querySelector('.filter-btn.active');
+    const currentCategory = activeBtn ? activeBtn.dataset.category : 'all';
+    filterCategory(currentCategory);
+}
 
 // -----------------------------------------------------------
-// 6. 비행기 가격 표시 및 정각마다 업데이트 (랜덤 가격으로 동작)
+// 7. 리뷰 모달 기능
 // -----------------------------------------------------------
+let currentReviewPlaceId = null;
 
-// 💡 (가상 데이터) 주요 도시별 최저가 비행기 가격 범위
-const flightPriceRange = {
-    tokyo: { min: 180000, max: 250000 },
-    seoul: { min: 90000, max: 120000 },
-    osaka: { min: 160000, max: 230000 }
-};
-
-// 랜덤으로 가격을 변동시키는 함수 (실제 API 역할을 대신함)
-function generateRandomPrice(city) {
-    const min = flightPriceRange[city].min;
-    const max = flightPriceRange[city].max;
-    // 최저가와 최고가 사이에서 1000원 단위로 랜덤 가격 생성
-    const newPrice = Math.floor(Math.random() * ((max - min) / 1000 + 1)) * 1000 + min;
-    return newPrice;
+window.openReviewModal = function(id, name) {
+    currentReviewPlaceId = id;
+    document.getElementById('modal-place-name').innerText = `Target: ${name}`;
+    document.getElementById('review-text').value = ''; 
+    setRating(5); 
+    document.getElementById('review-modal').style.display = 'flex';
 }
 
-function displayFlightPrices() {
-    // 1. 가격 데이터 업데이트 및 UI 적용
-    const tokyoPrice = generateRandomPrice('tokyo');
-    const seoulPrice = generateRandomPrice('seoul');
-    const osakaPrice = generateRandomPrice('osaka');
-    
-    // 가격을 한국 통화 형식으로 포맷팅
-    const formatPrice = (price) => `₩ ${price.toLocaleString()} ~`;
-
-    // 하단 카드 가격 업데이트
-    const tokyoPriceEl = document.getElementById('price-tokyo');
-    const seoulPriceEl = document.getElementById('price-seoul');
-    const osakaPriceEl = document.getElementById('price-osaka');
-    
-    if (tokyoPriceEl) tokyoPriceEl.innerHTML = `<i class="fas fa-plane"></i> ${formatPrice(tokyoPrice)}`;
-    if (seoulPriceEl) seoulPriceEl.innerHTML = `<i class="fas fa-plane"></i> ${formatPrice(seoulPrice)}`;
-    if (osakaPriceEl) osakaPriceEl.innerHTML = `<i class="fas fa-plane"></i> ${formatPrice(osakaPrice)}`;
-
-    // 2. 상태 위젯 업데이트
-    const now = new Date();
-    document.getElementById('last-update').innerText = `최근 업데이트: ${now.toLocaleTimeString('ko-KR')}`;
-    
-    // 다음 업데이트 시간 계산 및 표시
-    // 다음 정각은 현재 시간 + 1시간 (3600000ms)으로 고정됩니다.
-    const nextUpdate = new Date(now.getTime() + 3600000); 
-    document.getElementById('next-update-time').innerText = nextUpdate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-
-    console.log(`[Flight] 비행기 가격 업데이트 완료: ${now.toLocaleTimeString('ko-KR')}`);
+window.closeReviewModal = function() {
+    document.getElementById('review-modal').style.display = 'none';
 }
 
-// 💡 정각 업데이트를 위한 초기 딜레이 계산 함수
-function startHourlyUpdate() {
-    const now = new Date();
-    // 현재 분과 초를 밀리초로 변환 
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-    const elapsed = (minutes * 60 + seconds) * 1000;
+window.setRating = function(score) {
+    document.getElementById('review-rating').value = score;
+    document.getElementById('rating-value').innerText = score + "점";
     
-    // 다음 정각까지 남은 시간 = 1시간(3600000ms) - 현재 경과 시간
-    const delay = 3600000 - elapsed;
+    const stars = document.querySelectorAll('.star-rating span');
+    stars.forEach((star, index) => {
+        if (index < score) star.style.opacity = '1';
+        else star.style.opacity = '0.3';
+    });
+}
 
-    // 💡 (수정된 부분) 다음 업데이트 시각을 미리 계산하여 표시합니다.
-    const nextUpdate = new Date(now.getTime() + delay); 
-    document.getElementById('next-update-time').innerText = nextUpdate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+window.submitReview = async function() {
+    const text = document.getElementById('review-text').value;
+    const rating = document.getElementById('review-rating').value;
+
+    if (!text) { alert("내용을 입력해주세요!"); return; }
+
+    try {
+        await addDoc(collection(db, "reviews"), {
+            placeId: currentReviewPlaceId,
+            text: text,
+            rating: parseInt(rating),
+            // ⭐ [수정됨] 시/분/초 빼고 "2025. 11. 21." 형태로만 저장!
+            createdAt: new Date().toLocaleDateString() 
+        });
+
+        alert("리뷰가 등록되었습니다!");
+        closeReviewModal();
+    } catch (e) {
+        console.error("리뷰 저장 실패:", e);
+        alert("오류가 발생했습니다.");
+    }
+}
+
+window.openReadReviewModal = async function(placeId) {
+    const container = document.getElementById('review-list-container');
+    const modal = document.getElementById('read-review-modal');
     
-    console.log(`[Flight] 다음 정각까지 ${Math.ceil(delay / 60000)}분 대기 후 첫 업데이트를 시작합니다.`);
+    modal.style.display = 'flex';
+    container.innerHTML = '<div style="text-align:center; padding:20px;">로딩중... ⌛</div>';
 
-    // 1. 다음 정각에 한 번 실행
-    setTimeout(() => {
-        displayFlightPrices(); // 첫 정각 업데이트 실행
+    try {
+        const q = query(
+            collection(db, "reviews"), 
+            where("placeId", "==", placeId),
+            orderBy("createdAt", "desc") 
+        );
         
-        // 2. 이후부터는 1시간(3600000ms)마다 반복 실행
-        setInterval(displayFlightPrices, 3600000);
-    }, delay);
+        const querySnapshot = await getDocs(q);
+        let html = "";
+        
+        if (querySnapshot.empty) {
+            html = '<div style="text-align:center; padding:40px; color:#999;">아직 작성된 리뷰가 없어요.<br>첫 번째 리뷰를 남겨보세요! ✍️</div>';
+        } else {
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const stars = "⭐".repeat(data.rating);
+                
+                html += `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-stars">${stars}</span>
+                            <span>${data.createdAt}</span> 
+                        </div>
+                        <div class="review-text">${data.text}</div>
+                    </div>
+                `;
+            });
+        }
+        container.innerHTML = html;
+    } catch (e) {
+        console.error(e);
+        if(e.message.includes("index")) alert("Firebase 콘솔에서 색인(Index)을 생성해야 합니다.");
+        container.innerHTML = "리뷰를 불러오지 못했습니다.";
+    }
 }
 
-// 💡 정각 업데이트 시작
-startHourlyUpdate(); 
-
+window.closeReadReviewModal = function() {
+    document.getElementById('read-review-modal').style.display = 'none';
+}
 
 // -----------------------------------------------------------
-// 7. 데이터 업로드 도구 (기존 섹션 유지)
+// 8. 데이터 업로드 (필요할 때만 주석 풀기)
 // -----------------------------------------------------------
-
-// ==========================================
-// 🚨 [데이터 업로드 도구]
-// 사용법:
-// 1. 아래 uploadData(); 주석을 푼다.
-// 2. 새로고침 한다.
-// 3. "완료" 창이 뜨면 다시 주석 처리한다.
-// ==========================================
-
 async function uploadData() {
     const placesCol = collection(db, "places");
-    
-    // 혹시 모르니 확인창 띄우기
-    if (!confirm("정말로 데이터를 업로드 하시겠습니까? (중복 주의)")) return;
-
-    console.log(`총 ${initialData.length}개의 데이터를 업로드합니다...`);
-
+    if (!confirm("데이터를 업로드하시겠습니까?")) return;
+    console.log(`총 ${initialData.length}개 업로드 시작...`);
     for (const item of initialData) {
-        try {
-            await addDoc(placesCol, item);
-            console.log(`[성공] ${item.name}`);
-        } catch (e) {
-            console.error(`[실패] ${item.name}`, e);
-        }
+        try { await addDoc(placesCol, item); } catch (e) { console.error(e); }
     }
-    
-    alert("업로드 끝! 콘솔창(F12)을 확인해보세요.");
+    alert("업로드 완료!");
 }
-
-// 👇 실행하려면 아래 주석(//)을 지우고 저장하세요.
-//uploadData();
+// uploadData();
