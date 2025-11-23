@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <div class="lang-switch-container" onclick="toggleLanguage()">
+    <div class="lang-switch-container" onclick="window.toggleLanguage()">
         <div class="lang-option active" id="lang-ko">한국어</div>
         <div class="lang-option" id="lang-ja">日本語</div>
     </div>
@@ -26,11 +26,11 @@
     </div>
 
     <div class="floating-ui filter-bar">
-        <button class="filter-btn active" id="btn-all" data-category="all" onclick="filterCategory('all')">전체</button>
-        <button class="filter-btn" id="btn-food" data-category="food" onclick="filterCategory('food')">🍜 맛집</button>
-        <button class="filter-btn" id="btn-view" data-category="view" onclick="filterCategory('view')">🏰 관광</button>
-        <button class="filter-btn" id="btn-culture" data-category="culture" onclick="filterCategory('culture')">🏛️ 유적</button>
-        <button class="filter-btn" id="btn-station" data-category="station" onclick="filterCategory('station')">🚇 교통</button>
+        <button class="filter-btn active" id="btn-all" data-category="all" onclick="window.filterCategory('all')">전체</button>
+        <button class="filter-btn" id="btn-food" data-category="food" onclick="window.filterCategory('food')">🍜 맛집</button>
+        <button class="filter-btn" id="btn-landmark" data-category="landmark" onclick="window.filterCategory('landmark')">🏰 관광</button>
+        <button class="filter-btn" id="btn-culture" data-category="culture" onclick="window.filterCategory('culture')">🏛️ 유적</button>
+        <button class="filter-btn" id="btn-station" data-category="station" onclick="window.filterCategory('station')">🚇 교통</button>
     </div>
 
     <div class="floating-ui exchange-widget">
@@ -50,34 +50,40 @@
     </div>
 
     <div id="map"></div>
+    
+    <div class="bottom-cards" id="bottom-cards">
+        </div>
+
 
     <div id="review-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeReviewModal()">&times;</span>
+            <span class="close-btn" onclick="window.closeReviewModal()">&times;</span>
             
-            <h3 id="modal-write-title">📝 리뷰 쓰기</h3>
+            <h3 id="modal-write-title" style="text-align:center; margin-bottom:15px;">📝 리뷰 쓰기</h3>
+            <div id="review-name" style="text-align:center; font-weight:bold; color:#333; margin-bottom:15px; font-size:16px;">[장소명]</div>
             
-            <p id="modal-place-name" style="color:#666; font-size:14px; margin-bottom:10px;">장소 이름</p>
-            
-            <div class="star-rating">
-                <span onclick="setRating(1)">⭐</span>
-                <span onclick="setRating(2)">⭐</span>
-                <span onclick="setRating(3)">⭐</span>
-                <span onclick="setRating(4)">⭐</span>
-                <span onclick="setRating(5)">⭐</span>
-                <input type="hidden" id="review-rating" value="5">
-                <span id="rating-value" style="font-weight:bold; margin-left:5px;">5점</span>
+            <div class="star-rating" style="display:flex; justify-content:center; align-items:center; font-size: 20px;">
+                <span class="fas fa-star star" onclick="window.setRating(1)"></span>
+                <span class="fas fa-star star" onclick="window.setRating(2)"></span>
+                <span class="fas fa-star star" onclick="window.setRating(3)"></span>
+                <span class="fas fa-star star" onclick="window.setRating(4)"></span>
+                <span class="fas fa-star star" onclick="window.setRating(5)"></span>
+                <input type="hidden" id="review-rating" value="0">
+                <span id="rating-value" style="font-weight:bold; margin-left:5px;">0점</span>
             </div>
+
+            <input type="text" id="review-nickname" placeholder="닉네임 (Nickname)" maxlength="10" 
+                   style="width: 100%; padding: 10px; margin-bottom: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px;">
 
             <textarea id="review-text" placeholder="이곳의 후기를 남겨주세요! (예: 야경이 정말 예뻐요)"></textarea>
             
-            <button id="btn-submit" class="submit-btn" onclick="submitReview()">등록하기</button>
+            <button id="btn-submit" class="submit-btn" onclick="window.submitReview()">등록하기</button>
         </div>
     </div>
-
+    
     <div id="read-review-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 500px; text-align: left;">
-            <span class="close-btn" onclick="closeReadReviewModal()">&times;</span>
+            <span class="close-btn" onclick="window.closeReadReviewModal()">&times;</span>
             
             <h3 id="modal-read-title" style="text-align:center; margin-bottom:15px;">📋 여행자 생생 리뷰</h3>
             
@@ -89,7 +95,7 @@
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-    <script type="module" src="script.js"></script>
+    <script type="module" src="script.js"></script> 
 
 </body>
 </html>

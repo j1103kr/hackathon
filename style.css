@@ -1,11 +1,41 @@
+/* [추가] 브라우저 기본 스타일 초기화 (크롬, 삼성인터넷 통일용) */
+* {
+    -webkit-text-size-adjust: 100%; /* 모바일 폰트 자동 확대 방지 */
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+body, button, input, select, textarea {
+    font-family: 'Noto Sans KR', sans-serif; /* 폰트 강제 통일 */
+    line-height: 1.5; /* 줄 간격 통일 */
+}
+
+/* 아이폰(Safari) 버튼 스타일 초기화 */
+button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
 /* 기본 초기화 */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; }
 body { overflow: hidden; }
 
+/* [추가] 모바일 브라우저 자동 폰트 확대 방지 */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+button, input {
+    font-family: 'Noto Sans KR', sans-serif; /* 폰트 강제 통일 */
+}
+
 /* 지도 배경 */
 #map {
     width: 100vw;
-    height: 100vh;
+    height: 100dvh; 
     z-index: 1;
 }
 
@@ -144,8 +174,10 @@ body { overflow: hidden; }
 
 /* 활성화된 버튼 스타일 (검정색) */
 .filter-btn.active {
-    background-color: #333;
-    color: white;
+    background-color: #333 !important;
+    color: white !important;
+    font-weight: bold;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3) !important; /* 눌린 느낌 추가 */
 }
 
 /* 팝업 내부 스타일 */
@@ -161,54 +193,47 @@ body { overflow: hidden; }
 }
 .like-box {
     margin-top: 10px;
-    background: #ffe6ea;
-    padding: 5px 10px;
+    padding: 8px 0;
+    border-top: 1px solid #eee;
+}
+.like-btn {
+    border: 1px solid #e74c3c;
+    background: #fff;
+    color: #e74c3c;
+    padding: 4px 12px;
     border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* 날씨 버튼 스타일 */
+.weather-btn {
+    border: none;
+    background: #3498db;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: transform 0.1s;
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    cursor: pointer;
-    transition: transform 0.1s;
 }
-.like-box:active { transform: scale(0.95); }
-.like-box i { color: #ff4757; } /* 하트 색상 */
-.like-count { font-weight: bold; color: #ff4757; }
-
-/* 팝업 안의 날씨 버튼 꾸미기 */
-.weather-btn {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); /* 시원한 하늘색 그라데이션 */
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    font-size: 12px;
-    font-weight: bold;
-    border-radius: 20px; /* 둥근 알약 모양 */
-    cursor: pointer;
-    margin-bottom: 10px; /* 하트 버튼과의 간격 */
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1); /* 살짝 그림자 */
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px; /* 아이콘과 글자 사이 간격 */
-}
-
-/* 마우스 올렸을 때 효과 */
-.weather-btn:hover {
-    transform: translateY(-2px); /* 살짝 위로 뜸 */
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-}
-
 /* 클릭했을 때 효과 */
 .weather-btn:active {
     transform: scale(0.95);
 }
 
-
 /* 모달 배경 (어둡게) */
 .modal-overlay {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 2000; /* 지도보다 위에 */
     display: flex;
@@ -232,12 +257,15 @@ body { overflow: hidden; }
 /* 닫기 버튼 (X) */
 .close-btn {
     position: absolute;
-    top: 10px; right: 15px;
+    top: 10px;
+    right: 15px;
     font-size: 24px;
     cursor: pointer;
     color: #aaa;
 }
-.close-btn:hover { color: #333; }
+.close-btn:hover {
+    color: #333;
+}
 
 /* 입력창 스타일 */
 textarea {
@@ -258,98 +286,63 @@ textarea {
     margin-bottom: 10px;
     user-select: none;
 }
-.star-rating span:hover { transform: scale(1.2); display:inline-block; }
+.star-rating span:hover {
+    transform: scale(1.2);
+    display:inline-block;
+}
 
 /* 등록 버튼 */
 .submit-btn {
     width: 100%;
-    background: #333;
-    color: white;
     border: none;
-    padding: 12px;
+    background-color: #2ecc71;
+    color: white;
+    padding: 12px 20px;
     border-radius: 8px;
-    font-weight: bold;
     cursor: pointer;
-    transition: background 0.2s;
+    font-size: 16px;
+    font-weight: bold;
 }
-.submit-btn:hover { background: #555; }
-
-/* 리뷰 리스트 아이템 */
-.review-item {
-    border-bottom: 1px solid #eee;
-    padding: 15px 10px;
-}
-.review-item:last-child { border-bottom: none; }
-
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 5px;
+.submit-btn:hover {
+    background-color: #27ae60;
 }
 
-.review-stars { color: #FFD700; } /* 황금색 별 */
-
-.review-text {
-    font-size: 14px;
-    color: #333;
-    line-height: 1.4;
-}
-
-/* 스크롤바 예쁘게 */
-#review-list-container::-webkit-scrollbar {
-    width: 6px;
-}
-#review-list-container::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 3px;
-}
-
+/* 언어 전환 버튼 */
 .lang-switch-container {
     position: absolute;
     top: 20px;
     left: 20px;
-    background: white;
-    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
     display: flex;
     padding: 4px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    z-index: 2000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
     cursor: pointer;
-    overflow: hidden;
-    border: 1px solid #eee;
+    user-select: none;
 }
-
-/* 개별 언어 옵션 */
 .lang-option {
     padding: 6px 12px;
+    border-radius: 18px;
     font-size: 13px;
     font-weight: bold;
-    color: #aaa;
-    border-radius: 20px;
-    transition: all 0.3s ease;
+    color: #777;
+    transition: background-color 0.2s, color 0.2s;
 }
-
-/* 활성화된 언어 스타일 */
 .lang-option.active {
-    background: #333;
+    background-color: #333;
     color: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* ======================================= */
-/* ⭐ 마커 클러스터 색상 변경 스타일 (최종 FIX) */
-/* ======================================= */
+/* 마커 클러스터 색상 커스터마이징 (script.js의 iconCreateFunction과 연결) */
 
-/* 1. 10개 이하: 초록색 (mc-green) - [기존 유지] */
-.marker-cluster.mc-green div { background-color: #2ecc71; }
+/* 1. 10개 이하: 초록색 (mc-green) - [외곽선 FIX 추가] */
+.marker-cluster.mc-green div { background-color: #2ecc71; } 
 .marker-cluster.mc-green:hover div { background-color: #27ae60; }
 /* 초록색 외곽선 */
 .marker-cluster.mc-green.marker-cluster-small div { background-color: rgba(46, 204, 113, 0.6); }
 .marker-cluster.mc-green.marker-cluster-medium div { background-color: rgba(46, 204, 113, 0.7); }
 .marker-cluster.mc-green.marker-cluster-large div { background-color: rgba(46, 204, 113, 0.8); }
-
 
 /* 2. 30개 이하: 노랑색 (mc-yellow) - [기존 유지] */
 .marker-cluster.mc-yellow div { background-color: #f1c40f; }
@@ -359,70 +352,214 @@ textarea {
 .marker-cluster.mc-yellow.marker-cluster-medium div { background-color: rgba(241, 196, 15, 0.7); }
 .marker-cluster.mc-yellow.marker-cluster-large div { background-color: rgba(241, 196, 15, 0.8); }
 
-
 /* 3. 50개 이하: 주황색 (mc-orange) - [외곽선 FIX 추가] */
 .marker-cluster.mc-orange div { background-color: #e67e22; }
 .marker-cluster.mc-orange:hover div { background-color: #d35400; }
-/* ⭐ 외곽선 FIX: 주황색 외곽선이 정확히 보이도록 지정 */
+/* 주황색 외곽선 */
 .marker-cluster.mc-orange.marker-cluster-small div { background-color: rgba(230, 126, 34, 0.6); }
 .marker-cluster.mc-orange.marker-cluster-medium div { background-color: rgba(230, 126, 34, 0.7); }
 .marker-cluster.mc-orange.marker-cluster-large div { background-color: rgba(230, 126, 34, 0.8); }
 
 
-/* 4. ⭐ 50개 초과: 빨간색 (mc-red) - [노란색/주황색 외곽선 문제 해결] */
-.marker-cluster.mc-red div { background-color: #e74c3c; } 
+/* 4. 50개 초과: 빨강색 (mc-red) - [기존 유지] */
+.marker-cluster.mc-red div { background-color: #e74c3c; }
 .marker-cluster.mc-red:hover div { background-color: #c0392b; }
-/* ⭐ 외곽선 FIX: 빨간색 외곽선이 보이도록 강제 지정 (노란색/주황색 오버라이드) */
-.marker-cluster.mc-red.marker-cluster-small div { background-color: rgba(231, 76, 60, 0.6); }
-.marker-cluster.mc-red.marker-cluster-medium div { background-color: rgba(231, 76, 60, 0.7); }
-.marker-cluster.mc-red.marker-cluster-large div { background-color: rgba(231, 76, 60, 0.8); }
 
-/* ======================================= */
-/* ⭐ 카테고리별 커스텀 마커 아이콘 스타일 */
-/* ======================================= */
 
-/* Leaflet 기본 스타일을 초기화하고 커스텀 아이콘을 포함할 래퍼 */
-.custom-marker-wrapper {
-    background: none !important;
-    border: none !important;
+/* Leaflet 기본 마커 (단색 핀) 스타일 제거 (커스텀 마커와 충돌 방지) */
+.custom-marker { 
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    border: 3px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    
+    /* 기존 핀 꼬리 위치 설정 */
+    position: relative;
+    top: 7px; /* 핀 꼬리 때문에 위로 살짝 올림 */
+}
+.custom-marker i { /* Font Awesome 아이콘의 수직 정렬 조정 */
+    font-size: 14px;
+    line-height: 24px;
 }
 
-/* 핀 모양의 메인 원형 컨테이너 */
-.custom-marker {
+
+/* ================================================= */
+/* ⭐️ 커스텀 마커 핀 스타일 (카테고리별 아이콘/색상 적용) */
+/* ================================================= */
+
+/* 1. 커스텀 마커 전체 컨테이너 (Leaflet 기본 스타일 덮어쓰기) */
+.custom-marker-container {
+    /* Leaflet 기본 스타일을 재정의 */
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    position: relative; /* 자식 요소 절대 위치 기준점 */
+}
+
+/* 2. 핀 머리 (원형 아이콘 배경) */
+.custom-marker-head {
     width: 30px;
     height: 30px;
     border-radius: 50%; /* 원형 */
-    color: white; /* 아이콘 색상 */
-    font-size: 14px;
-    line-height: 30px; 
-    text-align: center;
-    border: 3px solid white; /* 흰색 테두리 */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    background-color: #3498db; /* JS에서 덮어쓰기 됨 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid #fff; /* 흰색 테두리 */
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    
+    /* 핀 꼬리 때문에 위로 살짝 올려 전체 중앙 맞추기 */
     position: absolute;
     top: 0;
     left: 0;
 }
 
-/* 뾰족한 핀 모양 꼬리 (마름모 모양) */
-.custom-marker::after {
-    content: '';
-    position: absolute;
-    bottom: -8px; 
-    left: 50%;
-    transform: translateX(-50%) rotate(45deg); /* 마름모 모양 */
-    width: 15px;
-    height: 15px;
-    background-color: inherit; /* 부모 마커의 색상을 상속 */
-    border-radius: 0 50% 0 50%; 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-    z-index: -1; 
-    /* 꼬리 부분에도 흰색 테두리 효과를 주기 위함 */
-    border-bottom: 3px solid white;
-    border-right: 3px solid white;
+/* 핀 머리 내부 아이콘 (흰색 고정) */
+.custom-marker-head i {
+    color: white; /* 모든 아이콘 색상은 흰색으로 고정하여 배경색과 대비 */
+    font-size: 14px;
 }
 
-.custom-marker i {
-    /* Font Awesome 아이콘의 수직 정렬 조정 */
-    font-size: 14px;
-    line-height: 24px; 
+/* 3. 핀 꼬리 (삼각형) */
+.custom-marker-tail {
+    position: absolute;
+    /* 핀 머리 중앙 바로 아래에 위치 */
+    top: 30px; /* 핀 머리 높이 */
+    left: 50%;
+    transform: translateX(-50%); /* 정확한 중앙 정렬 */
+    
+    width: 0;
+    height: 0;
+    
+    /* 삼각형 모양 정의 */
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 12px solid #3498db; /* JS에서 border-top-color로 덮어쓰기 됨 */
+}
+
+
+/* ================================================= */
+/* 📱 모바일 화면 최적화 (화면 너비 600px 이하일 때) */
+/* ================================================= */
+@media (max-width: 600px) {
+    /* 1. 언어 버튼: 크기 축소 */
+    .lang-switch-container {
+        top: 10px;
+        left: 10px;
+        transform: scale(0.85); /* 85% 크기로 축소 */
+        transform-origin: top left;
+        z-index: 1001;
+    }
+
+    /* 2. 검색바: 너비 확대 및 위치 조정 */
+    .search-bar {
+        top: 10px;
+        width: calc(100% - 130px); /* 공간 확보 */
+        right: 10px;
+        left: auto;
+        transform: none;
+        padding: 8px 15px;
+        z-index: 1000;
+    }
+    .search-bar input {
+        font-size: 14px;
+    }
+
+    /* 3. 필터바: 화면 상단 중앙 배치 및 버튼 크기 조정 */
+    .filter-bar {
+        top: 60px; /* 검색바 아래로 이동 */
+        width: 95%; /* 너비 확대 */
+        padding: 8px; /* 패딩 감소 */
+        
+        border-radius: 30px;
+        background: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        z-index: 1900;
+    }
+
+    .filter-btn {
+        flex: 1; /* ⭐ [수정] 모든 버튼이 공평한 너비를 가짐 */
+        white-space: nowrap;
+        font-size: 12px; /* 글자가 길어질 수 있으니 살짝 줄임 */
+        padding: 8px 0; /* 좌우 패딩을 없애고 flex로 조절 */
+        text-align: center;
+        
+        border-radius: 25px; 
+        box-shadow: none; /* 깔끔하게 그림자 제거 */
+    }
+    
+    /* 선택된 버튼만 그림자 효과 */
+    .filter-btn.active {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+    }
+
+    /* 4. 환율 위젯 */
+    .exchange-widget {
+        top: auto !important; 
+        bottom: calc(150px + env(safe-area-inset-bottom)) !important; 
+        left: 15px !important;
+        right: auto !important;
+        
+        min-width: auto;
+        padding: 8px 12px;
+        transform: scale(0.9); /* 90% 크기 */
+        transform-origin: bottom left;
+        z-index: 2000;
+    }
+    .exchange-title, .exchange-desc { font-size: 10px; }
+    .exchange-rate { font-size: 16px; }
+
+    /* 5. 날씨 위젯 */
+    .weather-widget {
+        top: auto !important;
+        bottom: calc(150px + env(safe-area-inset-bottom)) !important; 
+        right: 15px !important;
+        left: auto !important;
+        
+        min-width: auto;
+        padding: 8px 12px;
+        transform: scale(0.9); /* 90% 크기 */
+        transform-origin: bottom right;
+        z-index: 2000;
+    }
+    .weather-header, .weather-desc { font-size: 10px; }
+    .weather-temp { font-size: 20px; }
+    
+    /* 6. 하단 카드 리스트 */
+    .bottom-cards {
+        padding: 0 10px;
+        gap: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom)); /* 아이폰 하단 바 영역 고려 */
+    }
+    .card {
+        min-width: 200px; /* 모바일에서 카드 너비 조정 */
+        height: 120px;
+    }
+    .card-info { padding: 10px; }
+    .card-img { width: 80px; }
+    .card-name { font-size: 14px; }
+    .card-desc { font-size: 11px; }
+
+    /* 7. 팝업 내부 버튼 크기 조정 */
+    .popup-content {
+        min-width: 180px;
+        gap: 6px !important;
+    }
+    .weather-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+    .like-btn {
+        padding: 3px 10px;
+        font-size: 11px;
+    }
+    .popup-title {
+        font-size: 14px;
+    }
 }
