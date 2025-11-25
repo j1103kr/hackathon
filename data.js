@@ -6,6 +6,7 @@ export const initialData = [
 // ---------------------------------------------------------------------
 // [BUSAN_LANDMARK] (대표 관광/문화 공간) 27개
 // ---------------------------------------------------------------------
+{ name: "부산외국어대학교", name_ja: "釜山外国語大学", lat: 35.267545, lng: 129.078730, category: "landmark", likes: 0 }, 
 { name: "감천문화마을", name_ja: "甘川文化村", lat: 35.097455, lng: 129.010562, category: "landmark", likes: 0 },
 { name: "해운대 해수욕장", name_ja: "海雲台海水浴場", lat: 35.158697, lng: 129.160384, category: "landmark", likes: 0 },
 { name: "광안리 해수욕장", name_ja: "広安里海水浴場", lat: 35.153173, lng: 129.118675, category: "landmark", likes: 0 },
@@ -83,6 +84,7 @@ export const initialData = [
 // ---------------------------------------------------------------------
 // [FUKUOKA_LANDMARK] (대표 관광/문화 공간) 24개
 // ---------------------------------------------------------------------
+{ name: "카라비나 테크놀로지", name_ja: "カラビナテクノロジー", lat: 33.58774798685866, lng: 130.40195836502494, category: "landmark", likes: 0 },
 { name: "후쿠오카 타워", name_ja: "福岡タワー", lat: 33.593359, lng: 130.351485, category: "landmark", likes: 0 },
 { name: "캐널시티 하카타", name_ja: "キャナルシティ博多", lat: 33.589617, lng: 130.410973, category: "landmark", likes: 0 },
 { name: "오호리 공원", name_ja: "大濠公園", lat: 33.585867, lng: 130.376481, category: "landmark", likes: 0 },
