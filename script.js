@@ -3,13 +3,12 @@
 // ----------------------------------------------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 // ⭐ deleteDoc이 추가되어야 합니다.
-import { getFirestore, collection, getDocs, doc, updateDoc, increment, onSnapshot, addDoc, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, increment, onSnapshot, addDoc, query, where, orderBy, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { initialData } from './data.js'; 
 
 // -----------------------------------------------------------
 // 2. Firebase 설정 
 // ----------------------------------------------------------
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyD07_-y8JQJUorLcbkr4Cp7Xw2_w0dlzeY",
   authDomain: "hackathon-40673.firebaseapp.com",
@@ -22,7 +21,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
+let isSnapshotUpdate = false; 
 
 // -----------------------------------------------------------
 // ⭐ 다국어 설정 (view -> landmark로 변경 완료)
@@ -254,10 +253,15 @@ onSnapshot(placesCol, (snapshot) => {
             locations.push({ id: doc.id, ...doc.data() });
         });
         
+        isSnapshotUpdate = true; 
+
         // 데이터 로드 후 현재 필터 상태에 맞춰 갱신
         const activeBtn = document.querySelector('.filter-btn.active');
         const currentCategory = activeBtn ? activeBtn.dataset.category : 'all';
         filterCategory(currentCategory);
+
+        // ⭐ [수정] 업데이트 플래그 해제 (다시 원래대로)
+        isSnapshotUpdate = false; 
         
         // 데이터 로드 완료 후 탭 이벤트를 다시 연결합니다.
         document.querySelectorAll('.tab-button').forEach(button => {
@@ -312,33 +316,32 @@ function getCustomIcon(category) {
  * 지도에 마커를 다시 그리고 카드 리스트를 갱신하는 핵심 함수
  */
 function updateMapMarkers(data) {
-    markerCluster.clearLayers(); 
+    markerCluster.clearLayers();
     allMarkers = {}; // 마커 맵 초기화
     const t = translations[currentLang];
-    
+
+    // ⭐ 렌더링 시점의 최신 로컬 스토리지 상태 가져오기
+    const myLikes = JSON.parse(localStorage.getItem('myLikedPlaces')) || [];
+
     const markers = data.map(loc => {
-        const marker = L.marker([loc.lat, loc.lng], { 
-            icon: getCustomIcon(loc.category) // ⭐ 커스텀 아이콘 적용
+        const marker = L.marker([loc.lat, loc.lng], {
+            icon: getCustomIcon(loc.category)
         });
 
-        // 마커 객체를 ID로 저장
-        allMarkers[loc.id] = marker; 
+        allMarkers[loc.id] = marker;
 
-        // 팝업 내용 (장소 이름, 좋아요 버튼, 날씨 버튼 등)
-        // ⭐ [리뷰 기능 인자 전달을 위한 필수 이스케이프] 싱글 쿼트(')와 더블 쿼트(")를 이스케이프
         const displayName = loc[`name_${currentLang}`] || loc.name;
-        const safeDisplayName = displayName.replace(/'/g, "\\'").replace(/"/g, '\\"'); 
+        const safeDisplayName = displayName.replace(/'/g, "\\'").replace(/"/g, '\\"');
         const safeLocId = loc.id.replace(/'/g, "\\'");
-        
-        // ⭐ location 객체의 category를 사용하여 스타일 결정
+
         const myStyle = categoryIcons[loc.category] || { color: '#7f8c8d', icon: 'fa-map-pin' };
 
-        // 좋아요 상태 확인
-        const myLikes = JSON.parse(localStorage.getItem('myLikedPlaces')) || [];
+        // 좋아요 상태에 따른 아이콘 및 색상 결정
         const isLiked = myLikes.includes(loc.id);
-        const likeIcon = isLiked ? 'fas fa-heart' : 'far fa-heart'; // 꽉 찬 하트 vs 빈 하트
+        const likeIconClass = isLiked ? 'fas fa-heart' : 'far fa-heart';
+        const likeColor = isLiked ? '#e74c3c' : '#333'; 
 
-        let popupContent = `
+        const popupContent = `
             <div class="popup-content" style="min-width: 220px; display: flex; flex-direction: column; gap: 8px;">
                 <span class="popup-title" style="font-size: 15px; font-weight: bold; color: ${myStyle.color}; margin-bottom: 5px;">
                     <i class="fas ${myStyle.icon}" style="margin-right: 5px;"></i>${displayName}
@@ -356,48 +359,43 @@ function updateMapMarkers(data) {
                         <i class="fas fa-book"></i> ${t.review_read}
                     </button>
                 </div>
-                
+
                 <div class="like-box" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
                     <span id="like-count-${loc.id}" style="font-size: 14px; font-weight: bold; color: #e74c3c;">${loc.likes}</span>
-                    <button class="like-btn" onclick="toggleLike(event, '${loc.id}')">
-                        <i id="like-icon-${loc.id}" class="${likeIcon}"></i> ${t.popup_like}
+                    <button class="like-btn" onclick="toggleLike(event, '${loc.id}')" style="color: ${likeColor}; border-color: ${likeColor};">
+                        <i id="like-icon-${loc.id}" class="${likeIconClass}"></i> ${t.popup_like}
                     </button>
                 </div>
             </div>
         `;
-        
-        // 마커 클릭 시 selectedPlaceId 업데이트 및 팝업 열기
-        marker.on('click', function() {
-            selectedPlaceId = loc.id; 
-            fetchWeather(loc.lat, loc.lng, displayName); // 날씨 즉시 로드
-        });
 
-        // 팝업 바인딩 시, 문자열을 전달 (클릭 시 닫히도록 허용)
-        marker.bindPopup(popupContent, { // ⭐ popupContent 문자열 사용
+        marker.bindPopup(popupContent, {
             maxWidth: 300,
             closeButton: false,
-            autoClose: false // 팝업이 자동으로 닫히지 않도록 설정
+            autoClose: false
         });
-        
-        // ⭐ 이전에 선택된 장소라면 팝업을 다시 열어줍니다. (Flicker 로직의 핵심)
-        if (selectedPlaceId === loc.id) {
-            map.panTo(new L.LatLng(loc.lat, loc.lng));
-            setTimeout(() => {
-                // 마커가 지도에 표시되어 있을 때만 팝업을 열도록 시도
-                if (map.hasLayer(marker)) {
-                    marker.openPopup(); 
-                } else {
-                    // 클러스터에 숨겨져 있다면, 줌 레벨을 높여서 클러스터를 해제해야 함
-                    map.setZoom(15); 
-                }
-            }, 300);
-        }
+
+        marker.on('click', function() {
+            selectedPlaceId = loc.id;
+            fetchWeather(loc.lat, loc.lng, displayName);
+        });
 
         return marker;
     });
 
+    // 1. 모든 마커를 클러스터(지도)에 먼저 추가합니다.
     markerCluster.addLayers(markers);
-    // 하단 카드 리스트 갱신
+
+    // 2. ⭐ [핵심 수정] 마커가 지도에 다 올라간 뒤에 팝업을 엽니다.
+    if (selectedPlaceId && allMarkers[selectedPlaceId]) {
+        const targetMarker = allMarkers[selectedPlaceId];
+        
+        // Leaflet.markercluster의 기능을 사용하여, 클러스터링 되어 있어도 줌을 당겨서 열어줍니다.
+        markerCluster.zoomToShowLayer(targetMarker, function() {
+            targetMarker.openPopup();
+        });
+    }
+
     updateCardList(data);
 }
 
@@ -406,46 +404,41 @@ function updateMapMarkers(data) {
 // ----------------------------------------------------------
 // ⭐ [window 할당] 좋아요 토글 함수 
 window.toggleLike = async function(e, docId) {
-    // 1. 클릭하자마자 '현재 보고 있는 장소'로 설정합니다.
-    // 이 ID가 설정되어 있어야 DB 업데이트 후 onSnapshot 루프에서 팝업이 다시 열립니다.
-    selectedPlaceId = docId; 
-    
-    // 2. 이벤트 전파 중단
-    if (e) { 
-        e.stopPropagation(); 
-    } 
-    
-    // 3. 현재 좋아요 상태 확인
+    // 1. 이벤트 전파 중단 (지도 클릭 방지)
+    if (e) {
+        e.stopPropagation();
+    }
+
+    // 2. 현재 보고 있는 장소 ID 유지 (팝업 재오픈용)
+    selectedPlaceId = docId;
+
+    const docRef = doc(db, "places", docId);
     let myLikes = JSON.parse(localStorage.getItem('myLikedPlaces')) || [];
     const isLiked = myLikes.includes(docId);
-    
-    const docRef = doc(db, "places", docId);
-    
+
+    // 3. ⭐ [핵심] 로컬 스토리지 먼저 업데이트 (UI 즉시 반영을 위해)
+    if (isLiked) {
+        myLikes = myLikes.filter(id => id !== docId);
+    } else {
+        myLikes.push(docId);
+    }
+    localStorage.setItem('myLikedPlaces', JSON.stringify(myLikes));
+
+    // 4. Firebase 업데이트 (비동기)
     try {
         if (isLiked) {
-            // 4. 좋아요 취소 (Firebase -1, 로컬 삭제)
-            await updateDoc(docRef, {
-                likes: increment(-1)
-            });
-            myLikes = myLikes.filter(id => id !== docId);
-            
+            await updateDoc(docRef, { likes: increment(-1) });
         } else {
-            // 5. 좋아요 등록 (Firebase +1, 로컬 추가)
-            await updateDoc(docRef, {
-                likes: increment(1)
-            });
-            myLikes.push(docId);
+            await updateDoc(docRef, { likes: increment(1) });
         }
-
-        // 6. 로컬 저장소 및 UI 업데이트
-        localStorage.setItem('myLikedPlaces', JSON.stringify(myLikes));
-        
+        // onSnapshot이 트리거되어 updateMapMarkers가 호출됩니다.
     } catch (e) {
         console.error("좋아요 토글 실패:", e);
-        // 오류 발생 시 로컬 상태를 복구하거나 사용자에게 알림
+        // 에러 발생 시 로컬 스토리지 원복 (선택 사항)
         alert(currentLang === 'ko' ? "좋아요 처리 중 오류가 발생했습니다." : "「いいね」処理中にエラーが発生しました。");
     }
 }
+
 
 
 // -----------------------------------------------------------
@@ -454,8 +447,11 @@ window.toggleLike = async function(e, docId) {
 // ⭐ [window 할당] 카테고리 필터 함수 (필터로 동작)
 window.filterCategory = function(category) {
     let filtered;
-    // ⭐ 중요 수정: 카테고리 필터링 시, 이전에 클릭했던 장소 ID를 초기화합니다.
-    selectedPlaceId = null; 
+    
+    // ⭐ [수정] 사용자가 직접 필터 버튼을 누른 게 아니라면(좋아요 등), 팝업 상태를 유지합니다.
+    if (!isSnapshotUpdate) {
+        selectedPlaceId = null; 
+    }
     
     if (category === 'all') {
         filtered = locations;
@@ -1114,8 +1110,6 @@ window.resetAllReviews = async function() {
 // -----------------------------------------------------------
 // 11. 데이터 업로드 (필요할 때만 주석 풀기)
 // ----------------------------------------------------------
-/*
-import { setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; // setDoc 함수 추가
 
 async function uploadData() {
     // 확인 팝업의 텍스트를 "덮어쓰기"로 명확히 수정
@@ -1128,21 +1122,25 @@ async function uploadData() {
     for (const item of initialData) {
         // 1. 장소 이름을 기반으로 고유 ID 생성 (특수문자 및 공백 제거)
         // 이 고유 ID가 Firebase 문서 ID로 사용됩니다.
+        // 모든 문자를 제거하고 영어, 숫자, 한글만 남깁니다.
         const uniqueId = item.name.replace(/[^a-zA-Z0-9가-힣]/g, ''); 
         
+        // **⭐ 이 부분이 Firestore에 데이터를 저장하는 핵심 코드입니다.**
         try {
-            // 2. addDoc 대신 setDoc 사용: 중복 방지 및 ID 명시
-            const docRef = doc(db, "places", uniqueId);
-            await setDoc(docRef, item);
+            // Firestore 컬렉션 'places'에 uniqueId를 문서 ID로 사용하여 item 데이터 저장
+            // setDoc을 사용하면 동일한 uniqueId가 이미 존재하면 덮어쓰게 됩니다.
+            await setDoc(doc(db, "places", uniqueId), item);
             uploadCount++;
+            console.log(`✅ ${uploadCount}/${initialData.length} 업로드 성공: ${item.name} (ID: ${uniqueId})`);
         } catch (e) {
-            console.error(`Error uploading data for ${item.name}:`, e);
+            console.error(`❌ 업로드 실패: ${item.name}`, e);
         }
     }
-    
-    console.log(`총 ${uploadCount}개의 데이터 업로드 완료.`);
-    alert(`총 ${uploadCount}개의 데이터 업로드 완료.`);
+
+    console.log("=========================================");
+    console.log(`🎉 모든 데이터(${uploadCount}개) 업로드가 완료되었습니다!`);
+    console.log("=========================================");
 }
 
-// uploadData(); // ⭐ 데이터 업로드 시 이 주석을 해제하세요.
-*/
+//window.uploadData = uploadData;
+//uploadData();

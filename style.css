@@ -563,3 +563,31 @@ textarea {
         font-size: 14px;
     }
 }
+
+@media screen and (max-width: 768px) {
+    /* ... (이전 모바일 스타일 유지) ... */
+    
+    /* 4. 환율 위젯 (모바일 위치: 하단) */
+    .exchange-widget {
+        top: auto !important;
+        bottom: calc(150px + env(safe-area-inset-bottom)) !important; /* ⭐ 수정: 하단에 배치 */
+        left: 15px !important;
+        right: auto !important; /* ⭐ 수정: 오른쪽 배치를 취소하고 왼쪽으로 */
+        
+        /* ... (나머지 스타일 유지) ... */
+        transform-origin: bottom left; 
+    }
+
+    /* 5. 날씨 위젯 (모바일 위치: 하단) */
+    .weather-widget {
+        top: auto !important;
+        bottom: calc(150px + env(safe-area-inset-bottom)) !important; /* ⭐ 수정: 하단에 배치 */
+        right: 15px !important;
+        left: auto !important; /* ⭐ 수정: 왼쪽 배치를 취소하고 오른쪽으로 */
+
+        /* ... (나머지 스타일 유지) ... */
+        transform-origin: bottom right; 
+    }
+    
+    /* ... (나머지 모바일 스타일 유지) ... */
+}

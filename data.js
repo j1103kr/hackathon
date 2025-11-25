@@ -45,7 +45,7 @@ export const initialData = [
 { name: "해운대역 (2호선)", name_ja: "海雲台駅（2号線）", lat: 35.1610, lng: 129.1627, category: "station", likes: 0 },
 { name: "노포동 종합버스터미널", name_ja: "老圃洞総合バスターミナル", lat: 35.2905, lng: 129.1027, category: "station", likes: 0 },
 { name: "동래역 (1, 4호선 환승)", name_ja: "東莱駅（1・4号線乗換）", lat: 35.2045, lng: 129.0805, category: "station", likes: 0 },
-{ name: "연산역 (1, 3호선 환승)", name_ja: "蓮山駅（1・3号線乗換）", lat: 35.1843, lng: 129.0791, category: "station", likes: 0 },
+{ name: "연산역 (1, 3호선 환승)", name_ja: "蓮山駅（1・3号線乗換）", lat: 35.186209, lng: 129.081596, category: "station", likes: 0 }, 
 { name: "덕천역 (2, 3호선 환승)", name_ja: "徳川駅（2・3号線乗換）", lat: 35.2415, lng: 128.9818, category: "station", likes: 0 },
 { name: "사상역 (2호선, 경전철 환승)", name_ja: "沙上駅（2号線・軽電鉄乗換）", lat: 35.1557, lng: 128.9827, category: "station", likes: 0 },
 { name: "수영역 (2, 3호선 환승)", name_ja: "水営駅（2・3号線乗換）", lat: 35.1652, lng: 129.1147, category: "station", likes: 0 },
