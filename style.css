@@ -485,7 +485,7 @@ textarea {
 
     /* 3. 필터 버튼: 스크롤 없이 한 줄에 꽉 채우기 */
     .filter-bar {
-        top: 105px; 
+        top: 120px; /* ⭐ 수정: 105px에서 120px로 변경하여 검색창과의 간격을 늘림 */
         width: 90%; /* 화면 너비 90% */
         left: 50%;
         transform: translateX(-50%); 
