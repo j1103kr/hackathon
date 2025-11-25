@@ -469,7 +469,7 @@ textarea {
 
     /* 3. 필터 버튼: 스크롤 없이 한 줄에 꽉 채우기 */
     .filter-bar {
-        top: 105px; 
+        top: 106px; 
         width: 90%; /* 화면 너비 90% */
         left: 50%;
         transform: translateX(-50%); 
