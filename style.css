@@ -539,14 +539,14 @@ textarea {
     .weather-widget {
         top: auto !important;
         bottom: calc(50px + env(safe-area-inset-bottom)) !important; 
-        right: 40px !important;
+        right: 60px !important;
         left: auto !important;
         
         min-width: auto;
         padding: 8px 12px;
         transform: scale(0.9); /* 90% 크기 */
         transform-origin: bottom right;
-        z-index: 2000;
+        z-index: 900;
     }
     .weather-header, .weather-desc { font-size: 10px; }
     .weather-temp { font-size: 20px; }
