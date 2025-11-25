@@ -485,7 +485,7 @@ textarea {
 
     /* 3. 필터 버튼: 스크롤 없이 한 줄에 꽉 채우기 */
     .filter-bar {
-        top: 106px; /* ⭐ 수정: 105px에서 106px로 변경하여 11px 간격을 맞춤 */
+        top: 120px; /* ⭐ 수정: 105px에서 106px로 변경하여 11px 간격을 맞춤 */
         width: 90%; /* 화면 너비 90% */
         left: 50%;
         transform: translateX(-50%); 
@@ -539,7 +539,7 @@ textarea {
     .weather-widget {
         top: auto !important;
         bottom: calc(50px + env(safe-area-inset-bottom)) !important; 
-        right: 60px !important;
+        right: 80px !important;
         left: auto !important;
         
         min-width: auto;
