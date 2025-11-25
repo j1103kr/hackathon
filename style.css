@@ -485,14 +485,14 @@ textarea {
 
     /* 3. 필터 버튼: 스크롤 없이 한 줄에 꽉 채우기 */
     .filter-bar {
-        top: 120px; /* ⭐ 수정: 105px에서 106px로 변경하여 11px 간격을 맞춤 */
+        top: 105px; 
         width: 90%; /* 화면 너비 90% */
         left: 50%;
         transform: translateX(-50%); 
         padding: 5px;
         
         display: flex;
-        /* ⭐ 버튼 간격을 균등하게 벌려서 중앙 정렬 효과 */
+        /* ⭐ [수정] 버튼 간격을 균등하게 벌려서 중앙 정렬 효과 */
         justify-content: space-evenly; 
         align-items: center;
         flex-wrap: nowrap !important; /* 줄바꿈 금지 */
@@ -504,7 +504,7 @@ textarea {
     }
 
     .filter-btn {
-        flex: 1; /* ⭐ 모든 버튼이 공평한 너비를 가짐 */
+        flex: 1; /* ⭐ [수정] 모든 버튼이 공평한 너비를 가짐 */
         white-space: nowrap;
         font-size: 12px; /* 글자가 길어질 수 있으니 살짝 줄임 */
         padding: 8px 0; /* 좌우 패딩을 없애고 flex로 조절 */
@@ -539,14 +539,14 @@ textarea {
     .weather-widget {
         top: auto !important;
         bottom: calc(50px + env(safe-area-inset-bottom)) !important; 
-        right: 60px !important;
+        right: 65px !important; /* ⭐ 수정: 오른쪽 여백을 65px로 설정 */
         left: auto !important;
         
         min-width: auto;
         padding: 8px 12px;
         transform: scale(0.9); /* 90% 크기 */
         transform-origin: bottom right;
-        z-index: 900;
+        z-index: 900; /* ⭐ 수정: z-index를 낮춰 지도 컨트롤 뒤로 보냄 */
     }
     .weather-header, .weather-desc { font-size: 10px; }
     .weather-temp { font-size: 20px; }
