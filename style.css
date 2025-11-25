@@ -539,7 +539,7 @@ textarea {
     .weather-widget {
         top: auto !important;
         bottom: calc(50px + env(safe-area-inset-bottom)) !important; 
-        right: 65px !important; /* ⭐ 수정: 오른쪽 여백을 65px로 설정 */
+        right: 50px !important; /* ⭐ 수정: 오른쪽 여백을 65px로 설정 */
         left: auto !important;
         
         min-width: auto;
