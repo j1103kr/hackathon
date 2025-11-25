@@ -448,6 +448,11 @@ textarea {
 /* ================================================= */
 @media (max-width: 600px) {
     
+    body, html {
+        height: 100%;
+        overflow: hidden !important; /* 스크롤을 확실하게 막음 */
+    }
+    
     /* 1. 언어 버튼: 크기 축소 */
     .lang-switch-container {
         top: 10px;
@@ -469,7 +474,7 @@ textarea {
 
     /* 3. 필터 버튼: 스크롤 없이 한 줄에 꽉 채우기 */
     .filter-bar {
-        top: 106px; 
+        top: 1063px; 
         width: 90%; /* 화면 너비 90% */
         left: 50%;
         transform: translateX(-50%); 
